@@ -1,0 +1,22 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+# --extra-index-url https://download.pytorch.org/whl/cu121
+torch
+torchvision
+torchaudio
+
+# other libraries
+numpy
+opencv-python
+matplotlib
+pandas
+requests
+
+onnx
+onnxruntime
+#--ignore-installed PyYAML
+#Pillow
+
+protobuf<4.21.3
+# onnxruntime-gpu
+onnx>=1.9.0
+onnx-simplifier>=0.3.6
