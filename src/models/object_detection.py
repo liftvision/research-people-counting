@@ -14,7 +14,11 @@ from src.utils import letterbox
 __all__ = [
     "ObjectDetectionModel",
     "ObjectDetectionModelOutput",
+    "ObjectDetectionModelOutput",
 ]
+
+
+random.seed(0)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -35,22 +39,13 @@ class ObjectDetectionModelOutput:
         score: float
 
     def visualize(self) -> cv2.typing.MatLike:
-        names = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
-                'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
-                'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-                'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
-                'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-                'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-                'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
-                'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
-                'hair drier', 'toothbrush']
-        colors = {name: [random.randint(0, 255) for _ in range(3)] for i, name in enumerate(names)}
         image = self.image.copy()
         for batch in self.batches:
-            box = (np.array([batch.x0, batch.y0, batch.x1, batch.y1]) - np.array(self.dwdh*2)) / self.ratio
+            box = (np.array([batch.x0, batch.y0, batch.x1,
+                   batch.y1]) - np.array(self.dwdh*2)) / self.ratio
             box = box.round().astype(np.int32).tolist()
-            name = names[int(batch.cls_id)]
-            color = colors[name]
+            name = ObjectDetectionModel.NAMES[int(batch.cls_id)]
+            color = ObjectDetectionModel.COLORS[name]
             cv2.rectangle(image, box[:2], box[2:], color, 2)
             cv2.putText(image, f'{name} {batch.score}', (box[0], box[1] - 2),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.75, [225, 255, 255], thickness=2)
@@ -58,6 +53,19 @@ class ObjectDetectionModelOutput:
 
 
 class ObjectDetectionModel(OnnxModel[cv2.typing.MatLike, ObjectDetectionModelOutput]):
+    NAMES = [
+        'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
+        'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+        'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+        'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+        'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+        'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+        'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+        'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+        'hair drier', 'toothbrush',
+    ]
+    COLORS = {name: [random.randint(0, 255) for _ in range(3)] for name in NAMES}
+
     def __init__(self, model_path='yolov7-tiny.onnx', cuda=False):
         super().__init__(model_path, cuda)
 
